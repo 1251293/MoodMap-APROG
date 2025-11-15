@@ -12,6 +12,7 @@ public class projeto {
         diasMoodMaximo(mediaMoodDia, numDias);
     }
 
+// a) 
     public static int[][] fazerMoodMap(int pessoas, int dias){ /*Este metodo faz a leitura do input e guarda-o em formato de matriz */
         int[][] mapa = new int[pessoas][dias];
 
@@ -23,6 +24,7 @@ public class projeto {
         return mapa;
     }
 
+//c) e d)
     public static float[] calcMedia(int numColunas, int numLinhas, int[][] mapa){ /*Este método faz o calculo das médias que são utilizadas nas alineas c) e d) */
         float[] medias = new float[numColunas];
         for(int colunas = 0; colunas < numColunas; colunas++){
@@ -41,6 +43,7 @@ public class projeto {
         return medias;
     }
 
+// e)
     public static void diasMoodMaximo(float[] mapa, int dias){ /*Este modulo faz o print dos dias que possuem que o o valor máximo da média por dia*/
         float maximo = 0; 
         for(int colunas = 0; colunas < dias; colunas ++){ /*No ciclo "for" são comparados os valores do array entre si para determinar o maior valor da média*/
