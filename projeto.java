@@ -18,11 +18,21 @@ public class projeto {
         diasMauHumorConsectutivos(moodMap, numPessoas, numDias, LOW_MOOD);
     }
 
-    public static int determinarMaximoMatrizInt(int[][] mapa, int linha, int dias){
+    public static int determinarMaximoMatrizInt(int[][] mapa, int linha, int dias){/* determina o valor máximo de um inteiro de um array de uma matriz*/
         int maximo  = 0;
         for(int colunas = 0; colunas < dias; colunas++){
             if(maximo< mapa[linha][colunas]){
                 maximo = mapa[linha][colunas];
+            }
+        }
+        return maximo;
+    }
+
+    public static int determinarMaximoArrayInt(int[] mapa, int dias){ /*determina o valor máximo de um inteiro num array*/
+        int maximo  = 0;
+        for(int colunas = 0; colunas < dias; colunas++){
+            if(maximo< mapa[colunas]){
+                maximo = mapa[colunas];
             }
         }
         return maximo;
@@ -77,7 +87,7 @@ public class projeto {
     }
 
 // g)
-    public static void diasMauHumorConsectutivos(int[][] mapa, int pessoas, int dias, int moodMin){
+    public static void diasMauHumorConsectutivos(int[][] mapa, int pessoas, int dias, int moodMin){/*O modulo conta o numero de dias consecutivos em que a pessoa tive maus dias*/
 
         for(int linhas = 0; linhas < pessoas; linhas ++){
             int diasHumorBaixo = 0;
@@ -92,20 +102,42 @@ public class projeto {
             if(diasHumorBaixo != 0 ){
                 System.out.printf("Person #%d : %d consecutive days%n", linhas, diasHumorBaixo);
             }
-
         }
     }
 
-    public static void matrizGrafico()
-
-
-    public static void fazerGrafico(int dias, final int ESCALA, int[][] mapa){
-        for(int x = ESCALA; x < 0; x--){
-            for(int espacos = dias; espacos < 0; espacos--){
-
+// h) 
+    public static String[][] fazerMatrizGrafico(int[] array, int eixoY, int eixoX){
+        String[][] grafico = new String[eixoY][eixoX];
+        for(int colunas = 0; colunas < eixoX; colunas++){
+            grafico[colunas][array[colunas]] = "*";
+        }
+        for(int linhas = 0; linhas < eixoY; linhas++){
+            for(int colunas = 0; colunas < eixoX; colunas++){
+                if(grafico[linhas][colunas] == null){
+                    grafico[linhas][colunas] = " ";
+                }
             }
         }
+        return grafico;
+    }
 
+
+    public static void fazerGrafico(int dias, int[][] mapa, int pessoas){
+        
+        for(int linhas = 0; linhas < pessoas; linhas++){
+            System.out.printf("Person #%d:%n", linhas);
+            System.out.printf("   %d |", linhas);
+            int escala = determinarMaximoArrayInt(mapa[linhas], dias);
+            String[][] matrizGrafico = fazerMatrizGrafico(mapa[linhas], escala, dias);
+            for(int colunas = 0; colunas < dias ; colunas++){
+                System.out.printf("%s", );
+            }
+            System.out.printf("%n");
+        }
+        System.out.printf("Mood +");
+        for(int colunas = 0; colunas < dias; colunas++){
+            System.out.println("-");
+        }
 
     }
 
