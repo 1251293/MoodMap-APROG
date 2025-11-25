@@ -16,6 +16,7 @@ public class projeto {
         float[] mediaMoodPessoa = calcMedia(numPessoas, numDias, moodMap);
         diasMoodMaximo(mediaMoodDia, numDias);
         diasMauHumorConsectutivos(moodMap, numPessoas, numDias, LOW_MOOD);
+        fazerGrafico(numDias, moodMap, numPessoas);
     }
 
     public static int determinarMaximoMatrizInt(int[][] mapa, int linha, int dias){/* determina o valor máximo de um inteiro de um array de uma matriz*/
@@ -109,7 +110,8 @@ public class projeto {
     public static String[][] fazerMatrizGrafico(int[] array, int eixoY, int eixoX){
         String[][] grafico = new String[eixoY][eixoX];
         for(int colunas = 0; colunas < eixoX; colunas++){
-            grafico[colunas][array[colunas]] = "*";
+            int linha = Math.abs(array[colunas]-5);
+            grafico[linha][colunas] = "*";
         }
         for(int linhas = 0; linhas < eixoY; linhas++){
             for(int colunas = 0; colunas < eixoX; colunas++){
@@ -123,22 +125,25 @@ public class projeto {
 
 
     public static void fazerGrafico(int dias, int[][] mapa, int pessoas){
-        
-        for(int linhas = 0; linhas < pessoas; linhas++){
-            System.out.printf("Person #%d:%n", linhas);
-            System.out.printf("   %d |", linhas);
-            int escala = determinarMaximoArrayInt(mapa[linhas], dias);
-            String[][] matrizGrafico = fazerMatrizGrafico(mapa[linhas], escala, dias);
-            for(int colunas = 0; colunas < dias ; colunas++){
-                System.out.printf("%s", );
-            }
-            System.out.printf("%n");
-        }
-        System.out.printf("Mood +");
-        for(int colunas = 0; colunas < dias; colunas++){
-            System.out.println("-");
-        }
+        for(int indiceLinhas = pessoas; indiceLinhas >= 0; indiceLinhas--){
+            int indiceRealLinhas = Math.abs(indiceLinhas - pessoas);
+            int escala = determinarMaximoArrayInt(mapa[indiceRealLinhas], dias);
+            System.out.printf("Person #%d:%n", indiceRealLinhas);
 
+            for(int linhas = pessoas; linhas >= 0; linhas--){
+                int linhasReal = Math.abs(linhas-pessoas);
+                System.out.printf("   %d |", linhas);
+                String[][] matrizGrafico = fazerMatrizGrafico(mapa[linhasReal], escala, dias);
+                for(int colunas = 0; colunas < dias ; colunas++){
+                    System.out.printf("%s", matrizGrafico[linhasReal][colunas]);
+                }
+                System.out.printf("%n");
+            }
+            System.out.printf("Mood +");
+            for(int colunas = 0; colunas < dias; colunas++){
+                System.out.print("-");
+            }
+        }
     }
 
 
