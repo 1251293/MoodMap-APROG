@@ -6,7 +6,7 @@ public class projeto {
 
     public static void main(String[] args) {
 
-        System.out.println("Sales dept. – november;");
+        System.out.println("Sales dept. - november;");
 
         int numPessoas = input.nextInt();
         int numDias = input.nextInt();
@@ -433,5 +433,6 @@ public class projeto {
 
 
 }
+
 
 
