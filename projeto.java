@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 
 public class projeto {
@@ -162,7 +163,7 @@ public class projeto {
         System.out.println("c) Average mood each day:");
         printLinhaDay(numDias);
         printSeparator(numDias);
-        System.out.print("moods     :");
+        System.out.print("moods      ");
         for (int d = 0; d < numDias; d++) {
             System.out.printf("%1.1f ", medias[d]);
         }
@@ -206,8 +207,7 @@ public class projeto {
                 System.out.printf("%d ", colunas);
             }
         }
-
-        System.out.println();
+        System.out.printf("%n %n");
     }
 
 
@@ -330,7 +330,7 @@ public class projeto {
 
             // imprimir de cima para baixo
             for (int nivel = max; nivel >= min; nivel--) {
-                System.out.printf(" %2d |", nivel);
+                System.out.printf("  %2d |", nivel);
 
                 int linha = max - nivel;
                 for (int x = 0; x < dias; x++) {
@@ -433,6 +433,5 @@ public class projeto {
 
 
 }
-
 
 
