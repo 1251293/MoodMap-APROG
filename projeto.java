@@ -1,66 +1,152 @@
-
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class projeto {
 
-    static Scanner input = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner input = new Scanner(System.in);
 
-        System.out.println("Sales dept. - november;");
+        System.out.println("Mood Tracker Analysis");
+        System.out.println("---------------------\n");
+        System.out.println("Read data from Keyboard (1)");
+        System.out.println("Read data from File (2)");
 
-        int numPessoas = input.nextInt();
-        int numDias = input.nextInt();
+        int opcao = obterDado(1, 2, input);
+        input.nextLine(); // Consumir o \n após nextInt()
 
-        final int LOW_MOOD = 2;
+        if (opcao == 1) {
+            executarPrograma(input);
+        } else {
+            System.out.print("Name of file: \n");
+            String nomeFicheiro = input.nextLine();
+            lerDadosFicheiro(nomeFicheiro);
+        }
+
+        input.close();
+    }
+
+    // -----------------------------------------------------------
+    // Executa o programa com qualquer Scanner (teclado ou ficheiro)
+    public static void executarPrograma(Scanner scanner) {
+        // Ler descrição (primeira linha)
+        if (!scanner.hasNextLine()) {
+            System.out.println("Error: Empty file or invalid format");
+            return;
+        }
+        String descricao = scanner.nextLine();
+
+        // Ler dimensões
+        int numPessoas = obterNumeroDePessoasOuDiasValidado(scanner);
+        if (numPessoas == -1) {
+            return;
+        }
+
+        int numDias = obterNumeroDePessoasOuDiasValidado(scanner);
+        if (numDias == -1) {
+            return;
+        }
+
+        final int LOW_MOOD = 3;
         final int LIMITE_SUP_ESCALA = 5;
         final int LIMITE_INF_ESCALA = 1;
 
-        int[][] moodMap = fazerMoodMap(numPessoas, numDias);
+        // Ler MoodMap com validação
+        int[][] moodMap = fazerMoodMapValidado(numPessoas, numDias, scanner,
+                LIMITE_INF_ESCALA, LIMITE_SUP_ESCALA);
+
+        if (moodMap == null) {
+            return;
+        }
+
+        // Calcular médias
         float[] mediaMoodDia = calcMedia(numDias, numPessoas, moodMap);
         float[] mediaMoodPessoa = calcMedia(numPessoas, numDias, moodMap);
 
+        // Executar todas as funcionalidades
+        System.out.println();
+        // System.out.println(descricao);
         printMoodMap(moodMap);
-        PrintAvgMood(mediaMoodDia, numDias);
-        PrintMediaPerPerson(mediaMoodPessoa);
+        printAvgMood(mediaMoodDia, numDias);
+        printMediaPerPerson(mediaMoodPessoa);
         diasMoodMaximo(mediaMoodDia, numDias);
-        PrintPercentagemMoodLevels(moodMap, LIMITE_INF_ESCALA, LIMITE_SUP_ESCALA);
+        printPercentagemMoodLevels(moodMap, LIMITE_INF_ESCALA, LIMITE_SUP_ESCALA);
         diasMauHumorConsectutivos(moodMap, numPessoas, numDias, LOW_MOOD);
         fazerGrafico(numDias, moodMap, numPessoas);
+        recommendedTherapy(moodMap, numPessoas, numDias);
+        pessoasMaisSemelhantes(moodMap, numPessoas, numDias);
+    }
+
+    // -----------------------------------------------------------
+    // Ler dados do ficheiro
+
+    public static void lerDadosFicheiro(String nomeFicheiro) throws FileNotFoundException {
+
+        File file = new File(nomeFicheiro);
+        Scanner ficheiro = new Scanner(file);
+
+        executarPrograma(ficheiro);
+
+        ficheiro.close();
 
     }
 
-    public static int determinarMaximoMatrizInt(int[][] mapa, int linha, int dias) { /* determina o valor máximo de um inteiro de um array de uma matriz*/
-        int maximo = 0;
-        for (int colunas = 0; colunas < dias; colunas++) {
-            if (maximo < mapa[linha][colunas]) {
-                maximo = mapa[linha][colunas];
-            }
+    // -----------------------------------------------------------
+    // Métodos auxiliares para obter dados
+
+    // Lê dados e verifica se está dentro de um intervalo
+    public static int obterDado(int min, int max, Scanner input) { /*Lê um dado inteiro do input entre min e max*/
+        int dado;
+        dado = input.nextInt();
+        while (dado < min || dado > max) {
+            System.out.println("Insert a valid number between " + min + " and " + max + ": ");
+            dado = input.nextInt();
         }
-        return maximo;
+        return dado;
     }
 
-    public static int determinarMaximoArrayInt(int[] mapa, int dias) { /*determina o valor máximo de um inteiro num array*/
-        int maximo = 0;
-        for (int colunas = 0; colunas < dias; colunas++) {
-            if (maximo < mapa[colunas]) {
-                maximo = mapa[colunas];
-            }
+    // Lê o número de pessoas ou dias e garante que é um inteiro > 0.
+    // Em caso de erro devolve -1 para o main saber que deve abortar.
+    public static int obterNumeroDePessoasOuDiasValidado(Scanner scanner) { /*Lê o número de pessoas ou dias com validação para ficheiros*/
+        if (!scanner.hasNextInt()) {
+            System.out.println("Error: Invalid number - expected an integer");
+            return -1;
         }
-        return maximo;
+        int valor = scanner.nextInt();
+        if (valor < 1) {
+            System.out.println("Erro: Number must be greater than 0 (read value: " + valor + ")");
+            return -1;
+        }
+        return valor;
     }
 
 
     // -----------------------------------------------------------
     // a) Ler MoodMap
+    // Lê o MoodMap validando se todos os valores estão dentro do intervalo permitido.
 
-
-    public static int[][] fazerMoodMap(int pessoas, int dias) {  /*Este método faz a leitura do input e guarda-o em formato de matriz */
+    public static int[][] fazerMoodMapValidado(int pessoas, int dias, Scanner scanner,
+                                               int limiteInf, int limiteSup) { /*Lê MoodMap com validação completa para ficheiros*/
         int[][] mapa = new int[pessoas][dias];
 
         for (int linhas = 0; linhas < pessoas; linhas++) {
             for (int colunas = 0; colunas < dias; colunas++) {
-                mapa[linhas][colunas] = input.nextInt();
+                if (!scanner.hasNextInt()) {
+                    System.out.printf("Erro: Valor inválido na pessoa %d, dia %d - esperado um inteiro%n",
+                            linhas, colunas);
+                    return null;
+                }
+
+                int valor = scanner.nextInt();
+
+                if (valor < limiteInf || valor > limiteSup) {
+                    System.out.printf("Erro: Valor de humor fora do intervalo [%d-%d]: %d (pessoa %d, dia %d)%n",
+                            limiteInf, limiteSup, valor, linhas, colunas);
+                    return null;
+                }
+
+                mapa[linhas][colunas] = valor;
             }
         }
         return mapa;
@@ -69,7 +155,6 @@ public class projeto {
 
     // ------------------------------------------------------------
     // b) MoodMap formatado
-
 
     public static void printMoodMap(int[][] moods) {
 
@@ -134,6 +219,8 @@ public class projeto {
 
 
     //Métodos utilizados para o cálculo das alíneas c) e d)
+    // Reutilizado para calcular médias por dia (colunas) ou por pessoa (linhas),
+    // dependendo dos parâmetros numColunas / numLinhas.
     public static float[] calcMedia(int numColunas, int numLinhas, int[][] mapa) {
 
         float[] medias = new float[numColunas];
@@ -159,7 +246,7 @@ public class projeto {
     }
 
     //Formatação do output da alínea c)
-    public static void PrintAvgMood(float[] medias, int numDias) {
+    public static void printAvgMood(float[] medias, int numDias) {
         System.out.println("c) Average mood each day:");
         printLinhaDay(numDias);
         printSeparator(numDias);
@@ -168,11 +255,12 @@ public class projeto {
             System.out.printf("%1.1f ", medias[d]);
         }
         System.out.println("");
+        System.out.println();
 
     }
 
     //Formatação do output da alínea d)
-    public static void PrintMediaPerPerson(float medias[]) {
+    public static void printMediaPerPerson(float medias[]) {
         System.out.println("d) Average of each person's mood:");
         for (int pessoa = 0; pessoa < medias.length; pessoa++) {
             printLinhaPessoaMedia(pessoa, medias[pessoa]);
@@ -188,8 +276,6 @@ public class projeto {
 
     // ------------------------------------------------------------
     // e) Dias com maior média
-
-
     public static void diasMoodMaximo(float[] mapa, int dias) { /*Este modulo faz o print dos dias que possuem que o o valor máximo da média por dia*/
 
         float maximo = 0;
@@ -212,7 +298,7 @@ public class projeto {
 
 
     // ------------------------------------------------------------
-    //f)
+    // f) Percentagem dos níveis de humor
 
 
     // Conta quantas vezes aparece cada nível de humor entre moodMin e moodMax
@@ -232,13 +318,13 @@ public class projeto {
         return contagens;
     }
 
-    public static void PrintPercentagemMoodLevels(int[][] mapa, int moodMin, int moodMax) {
+    public static void printPercentagemMoodLevels(int[][] mapa, int moodMin, int moodMax) {
         System.out.println("f) Percentage of mood levels:");
 
-        int[] contagens=contarOcorrenciasMood(mapa, moodMin, moodMax);
-        int total= mapa.length * mapa[0].length;
+        int[] contagens = contarOcorrenciasMood(mapa, moodMin, moodMax);
+        int total = mapa.length * mapa[0].length;
 
-        for(int mood = moodMax; mood >= moodMin; mood--){
+        for (int mood = moodMax; mood >= moodMin; mood--) {
             float percentagem = (contagens[mood] * 100.0f) / total;
             System.out.printf("Mood #%d: %.1f%%%n", mood, percentagem);
         }
@@ -249,49 +335,50 @@ public class projeto {
 
 
     // ------------------------------------------------------------
-    //g)
+    // g) Pessoas com transtorno emocional
+    // Procura o maior número de dias consecutivos com mau humor (< moodMin) para cada pessoa.
 
+    public static void diasMauHumorConsectutivos(int[][] mapa, int pessoas, int dias, int moodMin) { /*O modulo conta o numero de dias consecutivos em que a pessoa teve maus dias*/
 
-    public static void diasMauHumorConsectutivos(int[][] mapa, int pessoas, int dias, int moodMin) { /*O modulo conta o numero de dias consecutivos em que a pessoa tive maus dias*/
+        System.out.println("g) People with emotional disorders:");
+
+        boolean encontrou = false;
 
         for (int linhas = 0; linhas < pessoas; linhas++) {
-            int diasHumorBaixo = 0;
+            int maxConsecutivos = 0;
+            int consecutivosAtuais = 0;
+
             for (int colunas = 0; colunas < dias; colunas++) {
                 if (mapa[linhas][colunas] < moodMin) {
-                    diasHumorBaixo++;
+                    consecutivosAtuais++;
+                    if (consecutivosAtuais > maxConsecutivos) {
+                        maxConsecutivos = consecutivosAtuais;
+                    }
                 } else {
-                    diasHumorBaixo = 0;
+                    consecutivosAtuais = 0;
                 }
             }
 
-            if (diasHumorBaixo != 0) {
-                System.out.printf("Person #%d : %d consecutive days%n", linhas, diasHumorBaixo);
-            }
-
-        }
-    }
-
-
-
-
-    public static void fazerGrafico(int dias, final int ESCALA, int[][] mapa) {
-        for (int x = ESCALA; x < 0; x--) {
-            for (int espacos = dias; espacos < 0; espacos--) {
+            if (maxConsecutivos >= 2) {
+                System.out.printf("Person #%d : %d consecutive days%n", linhas, maxConsecutivos);
+                encontrou = true;
             }
         }
+
+        if (!encontrou) {
+            System.out.println("Nenhum");
+        }
+
+        System.out.println();
     }
 
 
     // ------------------------------------------------------------
-    //h) Gráfico do humor por pessoa
+    // h) Gráfico do humor por pessoa
 
-
-    public static String[][] fazerMatrizGrafico(int[] array, int dias){
-        int min = 5, max = 1;
-        for (int i = 0; i < dias; i++) {
-            if (array[i] < min) min = array[i];
-            if (array[i] > max) max = array[i];
-        }
+    // Constrói a matriz de caracteres para o gráfico de uma pessoa,
+    // usando o nível mínimo (min) e máximo (max) já calculados.
+    public static String[][] fazerMatrizGrafico(int[] array, int dias, int min, int max) {
 
         int altura = max - min + 1;
         String[][] grafico = new String[altura][dias];
@@ -303,14 +390,18 @@ public class projeto {
             }
         }
 
-        // colocar *
+        // colocar '*'
         for (int x = 0; x < dias; x++) {
-            int linha = max - array[x];
+            int linha = max - array[x];  // quanto maior o mood, mais acima fica
             grafico[linha][x] = "*";
         }
 
         return grafico;
     }
+
+
+    // Constrói um gráfico vertical de '*' para os níveis de humor de cada pessoa.
+    // A escala adapta-se automaticamente ao mínimo e máximo dessa pessoa.
     public static void fazerGrafico(int dias, int[][] mapa, int pessoas) {
 
         System.out.println("h) People's Mood Level Charts:");
@@ -319,16 +410,17 @@ public class projeto {
 
             System.out.printf("Person #%d:%n", p);
 
-            // construir matriz 1 única vez
-            String[][] matriz = fazerMatrizGrafico(mapa[p], dias);
-
+            // calcular min e max dessa pessoa apenas uma vez
             int min = 5, max = 1;
             for (int i = 0; i < dias; i++) {
                 if (mapa[p][i] < min) min = mapa[p][i];
                 if (mapa[p][i] > max) max = mapa[p][i];
             }
 
-            // imprimir de cima para baixo
+            // construir matriz do gráfico usando o min e max calculados
+            String[][] matriz = fazerMatrizGrafico(mapa[p], dias, min, max);
+
+            // imprimir de cima para baixo (do nível máximo para o mínimo)
             for (int nivel = max; nivel >= min; nivel--) {
                 System.out.printf("  %2d |", nivel);
 
@@ -354,13 +446,16 @@ public class projeto {
     }
 
 
+
     // ------------------------------------------------------------
-    // i) Recommended therapy
+    // i) Terapia recomendada
 
 
     public static void recommendedTherapy(int[][] mapa, int pessoas, int dias) {
 
         System.out.println("i) Recommended therapy:");
+
+        boolean encontrou = false;
 
         for (int p = 0; p < pessoas; p++) {
 
@@ -383,7 +478,13 @@ public class projeto {
                     System.out.println("psychological support");
                 else
                     System.out.println("listen to music");
+
+                encontrou = true;
             }
+        }
+
+        if (!encontrou) {
+            System.out.println("Nenhum");
         }
 
         System.out.println();
@@ -391,8 +492,9 @@ public class projeto {
 
 
     // ------------------------------------------------------------
-    // j) Pessoas com moods semelhantes e pessoas com maior quantidade de dias com o humor igual.
-
+    // j) Pessoas com moods semelhantes
+    // Compara todas as pares de pessoas e conta em quantos dias tiveram o mesmo mood.
+    // Fica com o par que tem mais dias iguais.
 
     public static void pessoasMaisSemelhantes(int[][] mapa, int pessoas, int dias) {
 
@@ -430,8 +532,4 @@ public class projeto {
 
         System.out.println();
     }
-
-
 }
-
-
